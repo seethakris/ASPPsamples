@@ -37,7 +37,7 @@ def display_images():
 
 def stream_frames(video_capture):
     """
-    This generator function should acquire image, convert to rgb, get mean intensity
+    This generator function acquires images, convert to rgb, get mean intensity
     and yield necessary results
     :param  video_capture: the video capture object from opencv
     :yield  RGB_image

@@ -35,7 +35,7 @@ def display_images():
     count = 0  # Counter for number of aquired frames
     intensity = []  # Append intensity across time
 
-    # For loop here
+    # For loop over generator here
     intensity.append(imageintensity)
     plot_image_and_brightness()  # Call plot function
     count += 1
