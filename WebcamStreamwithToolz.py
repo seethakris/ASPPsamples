@@ -19,26 +19,21 @@ def display_images():
     """
     This function obtains results from generators and plot image and image intensity
     """
-    vc = cv2.VideoCapture(0)  # Open webcam using opencv 0 = First available camera
-    fps = vc.get(cv2.CAP_PROP_FPS)
-    print('Frames per second is {:0.2f}'.format(fps))
+    vc = setup_camera_and_plot()
+    ims = stream_frames(vc)  # Get the generator
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    im = setup_plotting(imagestream=ims, imageaxis=ax[0], traceaxis=ax[1])
+
     x_width = 50
-
-    figure, ax = plt.subplots(1, 2, figsize=(10, 5))
-    imstream = stream_frames(vc)
-    im = ax[0].imshow(next(imstream))
-    ax[0].axis('off')
-
-    count = 0
-    starttime = time.time()
+    starttime = time.time()  # Time this
 
     try:
-        pipeline = tz.pipe(imstream,
+        pipeline = tz.pipe(ims,
                            c.map(lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2RGB)),
                            c.map(c.do(im.set_array)),
                            c.map(lambda x: np.mean(x)),
-                           c.sliding_window(x_width),
-                           )
+                           c.sliding_window(x_width))
 
         for n, i in enumerate(pipeline):
             xdata = np.linspace(n, n + x_width, x_width)
@@ -48,8 +43,40 @@ def display_images():
 
     except KeyboardInterrupt:
         elapsedtime = time.time() - starttime
-        print('The collection FPS was {:0.2f}'.format(count / elapsedtime))
+        print('The collection FPS was {:0.2f}'.format(n / elapsedtime))
         vc.release()
+
+
+def setup_plotting(imagestream, imageaxis, traceaxis):
+    """
+    Setup the plots
+    :param imagestream: generator function that streams images from webcam
+    :param imageaxis: axis where will be plotted
+    :param traceaxis: axis where intensity trace will be plotted
+    :return: imagehandle: the handle object for the axis on which webcam images are plotted
+    """
+    # Plot a single image to the axis to obtain an image handle
+    imagehandle = imageaxis.imshow(next(imagestream))
+    imageaxis.axis('off')
+
+    # Plot 
+    traceaxis.set_ylabel('Average Intensity')
+    traceaxis.set_xlabel('Frames')
+    traceaxis.set_title('Blue: Above threshold, Red: Below threshold')
+
+    return imagehandle
+
+
+def setup_camera_and_plot():
+    """
+    Opens the webcam using open cv and finds the frame rate
+    :return: capture: Capture object from opencv
+    """
+    capture = cv2.VideoCapture(0)  # Open webcam using opencv 0 = First available camera
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    print('Frames per second is {:0.2f}'.format(fps))
+
+    return capture
 
 
 def stream_frames(video_capture):
@@ -67,15 +94,23 @@ def stream_frames(video_capture):
 
 
 def plot_intensity(axis, xdata, imageintensity, threshold=40):
+    """
+
+    :param axis:
+    :param xdata:
+    :param imageintensity:
+    :param threshold:
+    :return:
+    """
     imageintensity = np.array(imageintensity)
 
     # Change color of plot if intensity decreases below a threshold
-    axis.plot(xdata[imageintensity < threshold], imageintensity[imageintensity < threshold], '*-', color='r')
-    axis.plot(xdata[imageintensity > threshold], imageintensity[imageintensity > threshold], '.-', color='b')
+    axis.plot(xdata[imageintensity < threshold], imageintensity[imageintensity < threshold], '*-',
+              color='r', markersize=5)
+    axis.plot(xdata[imageintensity > threshold], imageintensity[imageintensity > threshold], '.-',
+              color='b', markersize=5)
 
     axis.set_xlim((xdata[0], xdata[-1]))  # Fix width of plotting window
-    axis.set_ylabel('Average Intensity')
-    axis.set_xlabel('Frames')
 
 
 if __name__ == '__main__':
