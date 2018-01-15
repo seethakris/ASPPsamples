@@ -40,10 +40,9 @@ def display_images():
                            c.sliding_window(x_width),
                            )
 
-        for i in pipeline:
-            xdata = np.linspace(count, count + x_width, x_width)
-            plot_intensity(axis=ax[1], xdata=xdata, imageintensity=i, x_width=x_width)
-            count += 1
+        for n, i in enumerate(pipeline):
+            xdata = np.linspace(n, n + x_width, x_width)
+            plot_intensity(axis=ax[1], xdata=xdata, imageintensity=i)
             plt.show(block=False)
             plt.pause(0.001)
 
@@ -67,8 +66,7 @@ def stream_frames(video_capture):
         yield small
 
 
-def plot_intensity(axis, xdata, imageintensity, x_width, threshold=40):
-    xdata = np.array(xdata)
+def plot_intensity(axis, xdata, imageintensity, threshold=40):
     imageintensity = np.array(imageintensity)
 
     # Change color of plot if intensity decreases below a threshold
