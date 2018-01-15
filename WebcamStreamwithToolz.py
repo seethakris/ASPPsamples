@@ -41,7 +41,6 @@ def display_images():
                            )
 
         for i in pipeline:
-            print('Elapsed time', time.time() - starttime)
             xdata = np.linspace(count, count + x_width, x_width)
             plot_intensity(axis=ax[1], xdata=xdata, imageintensity=i, x_width=x_width)
             count += 1
@@ -76,7 +75,9 @@ def plot_intensity(axis, xdata, imageintensity, x_width, threshold=40):
     axis.plot(xdata[imageintensity < threshold], imageintensity[imageintensity < threshold], '*-', color='r')
     axis.plot(xdata[imageintensity > threshold], imageintensity[imageintensity > threshold], '.-', color='b')
 
-    axis.set_xlim((xdata[0], xdata[-1]))  # Keep window size a one second
+    axis.set_xlim((xdata[0], xdata[-1]))  # Fix width of plotting window
+    axis.set_ylabel('Average Intensity')
+    axis.set_xlabel('Frames')
 
 
 if __name__ == '__main__':
