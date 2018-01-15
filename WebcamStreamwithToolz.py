@@ -79,4 +79,5 @@ def plot_intensity(axis, xdata, imageintensity, x_width, threshold=40):
     axis.set_xlim((xdata[0], xdata[-1]))  # Keep window size a one second
 
 
-display_images()
+if __name__ == '__main__':
+    display_images()
